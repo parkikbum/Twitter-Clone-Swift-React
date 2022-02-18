@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { boolean } from 'yargs';
 import AppRouter from './Router';
 
 function App() {
-  const [isLoggedIn: boolean, setIsLoggedIn: boolean] = useState(true);
-  return <AppRouter isLoggedIn={isLoggedIn}/>;
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  return <AppRouter isLoggedIn = {isLoggedIn}/>;
 }
 
 export default App;
+
