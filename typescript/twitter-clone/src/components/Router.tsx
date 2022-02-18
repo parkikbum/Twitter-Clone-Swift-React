@@ -4,7 +4,7 @@ import Auth from "../routes/Auth";
 import Home from "../routes/Home";
 
 interface logged {
-    isLoggedIn: boolean;
+    isLoggedIn: any;
 }
 
 const AppRouter = ({isLoggedIn}: logged) => {
