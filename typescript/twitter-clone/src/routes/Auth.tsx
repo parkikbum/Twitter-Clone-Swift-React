@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from "@firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "@firebase/auth";
 import { authService } from "../fBase";
+import { FirebaseError } from "@firebase/util";
 
 const Auth = () => {
 const [email, setEmail] = useState("");
 const [password, setPassword] = useState("");
 const [newAccount, setNewaccount]= useState(true);
+const [error, setError] = useState("");
 
 const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const {target: {name, value}} = event;
@@ -16,6 +18,9 @@ const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(value);
     }
 }
+const toggleAccount = () => setNewaccount((prev) => !prev);
+    
+
 const onSubmit = async(event: any) => {
     event.preventDefault();
     try{
@@ -28,9 +33,10 @@ const onSubmit = async(event: any) => {
         console.log(data);
     } 
     catch(error){
-    }
-    //회원가입시 로그인도 바로 가능
-    
+        if (error instanceof FirebaseError){
+            setError(error.message);
+        }
+    }    
 }
 return(
 <div>
@@ -38,7 +44,9 @@ return(
         <input name="email" type="email" placeholder="Email" value={email} onChange={onChange} />
         <input name="password" type="password" placeholder="Password" value={password} onChange={onChange} />
         <input type="submit" value={newAccount ? "Create Account" : "Log In"} required />
+        {error}
     </form>
+    <span onClick = {toggleAccount}> {newAccount ? "Sign In" : "Create Account"} </span>
     <div>
         <button>Continue with Google</button>
         <button>Continue with Github</button>
