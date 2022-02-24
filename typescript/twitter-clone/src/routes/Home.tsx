@@ -3,6 +3,7 @@ import { dbService } from "../fBase";
 import {addDoc, collection, getDocs, onSnapshot, orderBy, query, where} from "firebase/firestore";
 import { DocumentData} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Tweet from "../components/Tweet";
 
 interface SnapshotData{
     data: DocumentData;
@@ -10,20 +11,9 @@ interface SnapshotData{
     creatorId: string;
 }
 
-const Home = () => {
+const Home = (userObj: any) => {
     const [tweet, setTweet] = useState("");
     const [tweets, setTweets] = useState<SnapshotData[]>([]);
-    var uid: any = 123
-    
-    useEffect(() => {
-        onAuthStateChanged(getAuth(), (user) => {
-          console.log(user);
-          if(user) {
-            uid = user.uid;
-          } else{
-          }
-        });
-      }, []);
 
     const getTweets = async () => {
         const dbTweets = await getDocs(collection(dbService, "tweeet"));
@@ -31,11 +21,13 @@ const Home = () => {
         const q = query(collection(dbService, "tweeet"));
         const querySnapshot = await getDocs(q);
 
+
         querySnapshot.forEach((doc) => {
+            console.log(doc.id);
             const tweetObject: SnapshotData = {
                 data: doc.data(),
                 id: doc.id,
-                creatorId: uid
+                creatorId: userObj.userObj.uid
             };
             setTweets((prev: SnapshotData[]) => [tweetObject, ...prev]);
             console.log(tweetObject.data);
@@ -50,9 +42,8 @@ const Home = () => {
             const tweeterArr = snapshot.docs.map((doc) => ({
                 data: doc.data(),
                 id: doc.id,
-                creatorId: uid
+                creatorId: userObj.userObj.uid
             }));
-            console.log(tweeterArr);
             setTweets(tweeterArr);
         })
         // getTweets();
@@ -65,7 +56,7 @@ const Home = () => {
             const docRef = await addDoc(collection(dbService, "tweeet"),{
                 text: tweet,
                 createdAt: Date.now(),
-                creatorId: uid
+                creatorId: userObj.userObj.uid
             });
             console.log("Document written with ID", docRef.id);
         } catch(error) {
@@ -86,10 +77,9 @@ const Home = () => {
         <input type="submit" value="tweeet" />
     </form>
     <div>
-        {tweets.map(tweet => 
-        <div key={tweet.id}>
-            <h4>{tweet.data.text}</h4>
-        </div>)}
+        {tweets.map((tweet: any)=> (
+            <Tweet key={tweet.id} tweetObj={tweet} isOwner={tweet.data.creatorId === userObj.userObj.uid}/>
+        ))}
     </div>
 </div>)
 }

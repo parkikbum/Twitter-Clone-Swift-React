@@ -8,16 +8,17 @@ import Profile from "../routes/Profile";
 
 interface logged {
     isLoggedIn: any;
+    userObj: any;
 }
 
-const AppRouter = ({isLoggedIn}: logged) => {
+const AppRouter = ({isLoggedIn, userObj}: logged) => {
     return(
         <Router>
             {isLoggedIn && <Navigation />}
             <Routes>
                 {isLoggedIn ? (
                 <>
-                <Route path="/" element={<Home/>}>
+                <Route path="/" element={<Home userObj={userObj}/>}>
                     {Home}
                 </Route>
                 <Route path="/Profile" element={<Profile/>}>
