@@ -1,7 +1,8 @@
 import { async } from "@firebase/util";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, getFirestore, updateDoc } from "firebase/firestore";
+import { deleteObject, ref} from "@firebase/storage";
 import React, { useState } from "react";
-import { dbService } from "../fBase";
+import { dbService, storageService } from "../fBase";
 
 const Tweet = ({tweetObj, isOwner}: any) => {
     const [editing, setEditing] = useState(false);
@@ -11,7 +12,10 @@ const Tweet = ({tweetObj, isOwner}: any) => {
     const onDeleteClick = async () => {
         const ok = window.confirm("정말 이 트윗을 지우시겠습니까?");
         if (ok){
-            await deleteDoc(TweetTextRef)
+            await deleteDoc(TweetTextRef);
+            console.log(ref(storageService, tweetObj.attachmentUrl));
+            const urlRef = ref(storageService, tweetObj.data.attachmentUrl);
+            await deleteObject(urlRef);
         }
     };
     const toggleEditing = () => setEditing((prev) => !prev);
@@ -40,6 +44,7 @@ const Tweet = ({tweetObj, isOwner}: any) => {
         ) : (
         <>
         <h4>{tweetObj.data.text}</h4>
+        {tweetObj.data.attachmentUrl && <img src={tweetObj.data.attachmentUrl} />}
         {isOwner && (
             <>
             <button onClick={onDeleteClick}>Delete Tweet</button>
