@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { dbService } from "../fBase";
+import { dbService, storageService } from "../fBase";
 import {addDoc, collection, getDocs, onSnapshot, orderBy, query, where} from "firebase/firestore";
 import { DocumentData} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import {getDownloadURL, ref, uploadString} from "firebase/storage";
+import { v4 as uuidv4, v4} from "uuid";
 import Tweet from "../components/Tweet";
 
 interface SnapshotData{
@@ -14,17 +16,14 @@ interface SnapshotData{
 const Home = (userObj: any) => {
     const [tweet, setTweet] = useState("");
     const [tweets, setTweets] = useState<SnapshotData[]>([]);
-    const [attachment, setAttachment] = useState<any>(); 
+    const [attachment, setAttachment] = useState<any>(""); 
 
     const getTweets = async () => {
         const dbTweets = await getDocs(collection(dbService, "tweeet"));
-
         const q = query(collection(dbService, "tweeet"));
         const querySnapshot = await getDocs(q);
 
-
         querySnapshot.forEach((doc) => {
-            console.log(doc.id);
             const tweetObject: SnapshotData = {
                 data: doc.data(),
                 id: doc.id,
@@ -47,23 +46,32 @@ const Home = (userObj: any) => {
             }));
             setTweets(tweeterArr);
         })
-        // getTweets();
     }, [])
 
 
-    const onSubmit =async(e: any) => {
+    const onSubmit = async(e: any) => {
         e.preventDefault();
+        let attachmentUrl: string = "";
+        if (attachment != "") {
+            const attachmentRef = ref(storageService, `${userObj.userObj.uid}/${v4()}`);
+            const response = await uploadString(attachmentRef, attachment, "data_url")
+            attachmentUrl = await getDownloadURL(response.ref)
+        }
         try {
             const docRef = await addDoc(collection(dbService, "tweeet"),{
                 text: tweet,
                 createdAt: Date.now(),
-                creatorId: userObj.userObj.uid
+                creatorId: userObj.userObj.uid,
+                attachmentUrl: attachmentUrl
             });
             console.log("Document written with ID", docRef.id);
         } catch(error) {
             console.error("Error adding document", error);
         }
         setTweet("");
+        setAttachment("");
+        
+
     };
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const {
@@ -86,7 +94,7 @@ const Home = (userObj: any) => {
 };
 const fileInput: any = useRef();
 const ClearAttachment = () => {
-    setAttachment(null);
+    setAttachment("");
     console.log(fileInput.current);
     fileInput.current.value = "";
 };
