@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { dbService } from "../fBase";
 import {addDoc, collection, getDocs, onSnapshot, orderBy, query, where} from "firebase/firestore";
 import { DocumentData} from "firebase/firestore";
@@ -14,6 +14,7 @@ interface SnapshotData{
 const Home = (userObj: any) => {
     const [tweet, setTweet] = useState("");
     const [tweets, setTweets] = useState<SnapshotData[]>([]);
+    const [attachment, setAttachment] = useState<any>(); 
 
     const getTweets = async () => {
         const dbTweets = await getDocs(collection(dbService, "tweeet"));
@@ -70,11 +71,37 @@ const Home = (userObj: any) => {
         } = event;
             setTweet(value);
     }
-    return (
+    const onFileChange = (event: any) => {
+        const {target: { files }} = event;  
+    const theFile = files[0];
+    const reader = new FileReader();
+    reader.onloadend = (finishedEvent: any) => {
+        console.log(finishedEvent);
+        const {
+            currentTarget: { result },
+        } = finishedEvent;
+        setAttachment(result);
+    }
+    reader.readAsDataURL(theFile);
+};
+const fileInput: any = useRef();
+const ClearAttachment = () => {
+    setAttachment(null);
+    console.log(fileInput.current);
+    fileInput.current.value = "";
+};
+return (
 <div>
     <form onSubmit={onSubmit}>
         <input type="text" placeholder="What's on your mind?" maxLength={120} value={tweet} onChange={onChange} />
         <input type="submit" value="tweeet" />
+        <input type="file" accept="image/*" onChange={onFileChange} ref={fileInput}/>
+        {attachment && ( 
+            <div>
+                <img src ={attachment} width="50px" height="50px" />
+                <button onClick={ClearAttachment}>Clear</button>
+            </div>
+        )}
     </form>
     <div>
         {tweets.map((tweet: any)=> (
