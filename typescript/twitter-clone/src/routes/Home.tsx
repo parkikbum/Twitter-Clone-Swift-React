@@ -5,6 +5,10 @@ import { DocumentData} from "firebase/firestore";
 import {getDownloadURL, ref, uploadString} from "firebase/storage";
 import { v4 as uuidv4, v4} from "uuid";
 import Tweet from "../components/Tweet";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+
 
 interface SnapshotData{
     data: DocumentData;
@@ -13,6 +17,8 @@ interface SnapshotData{
 }
 
 const Home = (userObj: any) => {
+    const plusIcon = faPlus as IconProp
+    const removeIcon = faTimes as IconProp
     const [tweet, setTweet] = useState("");
     const [tweets, setTweets] = useState<SnapshotData[]>([]);
     const [attachment, setAttachment] = useState<any>(""); 
@@ -94,23 +100,48 @@ const Home = (userObj: any) => {
 const fileInput: any = useRef();
 const ClearAttachment = () => {
     setAttachment("");
-    console.log(fileInput.current);
     fileInput.current.value = "";
 };
 return (
 <div>
-    <form onSubmit={onSubmit}>
-        <input type="text" placeholder="What's on your mind?" maxLength={120} value={tweet} onChange={onChange} />
-        <input type="submit" value="tweeet" />
-        <input type="file" accept="image/*" onChange={onFileChange} ref={fileInput}/>
+    <form onSubmit={onSubmit} className="factoryForm">
+        <div className="factoryInput__container">
+            <input className="factoryInput__input" 
+                type="text" 
+                placeholder="What's on your mind?" 
+                maxLength={120} 
+                value={tweet} 
+                onChange={onChange} />
+            <input type="submit" value="&rarr;" className="factoryInput__arrow"/>
+        </div>
+        <label htmlFor="attach-file" className="factoryInput__label">
+        <span>Add photos</span>
+        <FontAwesomeIcon icon={plusIcon} />
+      </label>
+        <input id="attach-file"
+        type="file"
+        accept="image/*"
+        onChange={onFileChange}
+        style={{
+          opacity: 0,
+        }}
+      />
         {attachment && ( 
-            <div>
-                <img src ={attachment} width="50px" height="50px" />
-                <button onClick={ClearAttachment}>Clear</button>
+        <div className="factoryForm__attachment">
+            <img
+            src={attachment}
+            style={{
+              backgroundImage: attachment,
+            }}
+          />
+            <div className="factoryForm__clear"onClick={ClearAttachment}>
+                <span>삭제</span>
+                <FontAwesomeIcon icon={removeIcon} />
             </div>
+        </div>
         )}
     </form>
-    <div>
+    <div style={{marginTop: 0}}>
         {tweets.map((tweet: any)=> (
             <Tweet key={tweet.id} tweetObj={tweet} isOwner={tweet.data.creatorId === userObj.userObj.uid}/>
         ))}

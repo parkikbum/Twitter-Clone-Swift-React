@@ -37,6 +37,7 @@ const Profile = ({userObj, refreshUser}: any) => {
         getMyTweets();
     }, [userObj])
     const onSubmit = async (event: any) => {
+        console.log(userObj.displayName)
         event.preventDefault();
         if (userObj.displayName !== newDisplayName) {
             await updateProfile(userObj, { displayName: newDisplayName });
@@ -44,13 +45,28 @@ const Profile = ({userObj, refreshUser}: any) => {
         }
     }
     return (
-        <>
-        <form onSubmit={onSubmit}>
-            <input onChange={onChange} type="text" placeholder="Display name" value={newDisplayName} />
-            <input type="submit" value="Update Profile" />
+        <div className="container">
+        <form onSubmit={onSubmit} className="profileForm">
+            <input onChange={onChange} 
+            type="text" 
+            autoFocus
+            placeholder="Display name" 
+            value={newDisplayName} 
+            className="formInput"
+            />
+            <input 
+            type="submit"
+            className="formBtn"
+            value="Update Profile"
+            style={{
+                marginTop: 10
+            }} 
+            />
         </form>
-        <button onClick={onLogOutClick}>Log Out</button>
-        </>
+            <span className="formBtn cancelBtn logOut" onClick={onLogOutClick}>
+                Log Out
+            </span>
+        </div>
     )
 };
 export default Profile;
